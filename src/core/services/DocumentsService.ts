@@ -62,8 +62,8 @@ export class DocumentsService {
 
     public update(record: Document): IGenericResponse {
         const originalRecord = this.repository.get(record.id);
-        originalRecord.data = record;
-        this.repository.update(record);
+        originalRecord.data = record.data;
+        this.repository.update(originalRecord);
 
         const response = Responses.getResponse("ok", 200);
         return response;
