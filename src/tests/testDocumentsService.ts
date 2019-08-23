@@ -44,7 +44,7 @@ describe("DocumentsService", () => {
 
   describe("add", () => {
 
-    it("should work when document perfect", () => {
+    it("should work when document perfect", async () => {
       // arrange
       const doc: Document = new Document();
       doc.collectionName = "thing";
@@ -54,21 +54,21 @@ describe("DocumentsService", () => {
       const service = new DocumentsService(documentRepository);
 
       // act
-      const response = service.add(doc);
+      const response = await service.add(doc);
 
       // assert
       assert.isTrue(response.recordId != null);
       documentRepository.received().add(Arg.any());
     });
 
-    it("should fail when document null", () => {
+    it("should fail when document null", async () => {
       // arrange
       const doc: Document = null;
       const documentRepository = Substitute.for<IDocumentRepository>();
       const service = new DocumentsService(documentRepository);
 
       // act
-      const response = service.add(doc);
+      const response = await service.add(doc);
 
       // assert
       assert.isTrue(response.code === 400);

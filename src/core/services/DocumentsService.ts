@@ -24,7 +24,7 @@ export class DocumentsService {
         return errors;
     }
 
-    public add(record: Document): IGenericResponse {
+    public async add(record: Document): Promise<IGenericResponse> {
         if (!record) {
             return Responses.getResponse("record is null", 400);
         }
@@ -32,36 +32,36 @@ export class DocumentsService {
         this.validate(record);
 
         record.id = uuid();
-        this.repository.add(record);
+        await this.repository.add(record);
 
         const response = Responses.getResponse("ok", 200);
         response.recordId = record.id;
         return response;
     }
 
-    public delete(recordId: string): IGenericResponse {
+    public async delete(recordId: string): Promise<IGenericResponse> {
         if (!recordId || recordId === "") {
             return Responses.getResponse("recordId is not defined", 400);
         }
 
-        this.repository.delete(recordId);
+        await this.repository.delete(recordId);
 
         return Responses.getResponse("ok", 200);
     }
 
-    public get(recordId: string): IGenericResponse {
+    public async get(recordId: string): Promise<IGenericResponse> {
         if (!recordId || recordId === "") {
             return Responses.getResponse("recordId is not defined", 400);
         }
 
         const response = Responses.getResponse("ok", 200);
-        response.data = this.repository.get(recordId);
+        response.data = await this.repository.get(recordId);
 
         return response;
     }
 
-    public update(record: Document): IGenericResponse {
-        const originalRecord = this.repository.get(record.id);
+    public async update(record: Document): Promise<IGenericResponse> {
+        const originalRecord = await this.repository.get(record.id);
         originalRecord.data = record.data;
         this.repository.update(originalRecord);
 
@@ -69,9 +69,9 @@ export class DocumentsService {
         return response;
     }
 
-    public getAll(): IGenericResponse {
+    public async getAll(): Promise<IGenericResponse> {
         const response = Responses.getResponse("ok", 200);
-        response.data = this.repository.getAll();
+        response.data = await this.repository.getAll();
         return response;
     }
 }
