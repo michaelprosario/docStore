@@ -1,3 +1,4 @@
+import { Arg, Substitute } from '@fluffy-spoon/substitute';
 import { assert } from "chai";
 import "mocha";
 import { Document } from "../core/entities/Document";
@@ -12,13 +13,15 @@ describe("DocumentsService", () => {
       doc.collectionName = "thing";
       doc.data = "data";
 
-      const service = new DocumentsService(null);
+      const documentRepository = Substitute.for<IDocumentRepository>();
+      const service = new DocumentsService(documentRepository);
 
       // act
       const recordId = service.add(doc);
 
       // assert
       assert.isTrue(recordId != null);
+      documentRepository.received().add(Arg.any());
 
     });
   });
