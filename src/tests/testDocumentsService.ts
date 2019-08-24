@@ -1,4 +1,4 @@
-import { Arg, Substitute } from '@fluffy-spoon/substitute';
+import { Arg, Substitute } from "@fluffy-spoon/substitute";
 import { assert, expect } from "chai";
 import "mocha";
 import { Document } from "../core/entities/Document";

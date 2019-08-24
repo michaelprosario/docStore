@@ -1,10 +1,10 @@
 import { Document } from "../entities/Document";
-import { IGenericResponse } from "./IGenericResponse";
 
 export interface IDocumentRepository {
     add(record: Document): Promise<string>;
     update(record: Document): Promise<void>;
     delete(recordId: string): Promise<void>;
     get(recordId: string): Promise<Document>;
-    getAll(collection: string): Promise<Array<Document>>;
+    recordExists(recordId: string): Promise<boolean>;
+    getAll(collection: string): Promise<Document[]>;
 }

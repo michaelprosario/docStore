@@ -1,10 +1,10 @@
 import { assert, expect } from "chai";
 import "mocha";
+import { Pool } from "pg";
 import { Document } from "../core/entities/Document";
 import { DocumentsService } from "../core/services/DocumentsService";
-import { DocumentRepository } from '../infrastructure/DocumentsRepository';
-import { Pool } from "pg";
 import { dbConnectionConfig } from "../infrastructure/DbConnectionConfig";
+import { DocumentRepository } from "../infrastructure/DocumentsRepository";
 
 const pool = new Pool(dbConnectionConfig);
 
@@ -23,7 +23,7 @@ describe("DocumentsService(integration)", () => {
       // act
       const response = await service.add(doc);
 
-      let recordExists = await documentRepository.recordExists(response.recordId);
+      const recordExists = await documentRepository.recordExists(response.recordId);
 
       // assert
       assert.isTrue(response.code === 200);
@@ -46,7 +46,7 @@ describe("DocumentsService(integration)", () => {
 
       // act
       await documentRepository.delete(response.recordId);
-      let recordExists = await documentRepository.recordExists(response.recordId);
+      const recordExists = await documentRepository.recordExists(response.recordId);
 
       // assert
       assert.isTrue(response.code === 200);

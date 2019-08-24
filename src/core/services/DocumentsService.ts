@@ -1,5 +1,5 @@
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 import { Document } from "../entities/Document";
 import { IDocumentRepository } from "../interfaces/IDocumentRepository";
 import { IGenericResponse } from "../interfaces/IGenericResponse";
@@ -44,6 +44,11 @@ export class DocumentsService {
             return Responses.getResponse("recordId is not defined", 400);
         }
 
+        const recordExists = await this.repository.recordExists(recordId);
+        if (!recordExists) {
+            return Responses.getResponse("recordId is not found", 404);
+        }
+
         await this.repository.delete(recordId);
 
         return Responses.getResponse("ok", 200);
@@ -52,6 +57,11 @@ export class DocumentsService {
     public async get(recordId: string): Promise<IGenericResponse> {
         if (!recordId || recordId === "") {
             return Responses.getResponse("recordId is not defined", 400);
+        }
+
+        const recordExists = await this.repository.recordExists(recordId);
+        if (!recordExists) {
+            return Responses.getResponse("recordId is not found", 404);
         }
 
         const response = Responses.getResponse("ok", 200);

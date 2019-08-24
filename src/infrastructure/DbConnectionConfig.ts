@@ -1,7 +1,7 @@
 export const dbConnectionConfig = {
-    user: 'docs',
-    host: 'localhost',
-    database: 'docs',
-    password: 'dude',
-    port: 5432,
-}
+    database: "docs",
+    host: "localhost",
+    password: "dude",
+    port: 1234,
+    user: "docs",
+};
