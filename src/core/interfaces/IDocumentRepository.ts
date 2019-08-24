@@ -6,5 +6,5 @@ export interface IDocumentRepository {
     update(record: Document): Promise<void>;
     delete(recordId: string): Promise<void>;
     get(recordId: string): Promise<Document>;
-    getAll(): Promise<Array<Document>>;
+    getAll(collection: string): Promise<Array<Document>>;
 }

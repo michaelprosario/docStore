@@ -69,9 +69,9 @@ export class DocumentsService {
         return response;
     }
 
-    public async getAll(): Promise<IGenericResponse> {
+    public async getAll(collection: string): Promise<IGenericResponse> {
         const response = Responses.getResponse("ok", 200);
-        response.data = await this.repository.getAll();
+        response.data = await this.repository.getAll(collection);
         return response;
     }
 }

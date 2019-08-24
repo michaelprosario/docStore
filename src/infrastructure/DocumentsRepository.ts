@@ -14,7 +14,6 @@ export class DocumentRepository implements IDocumentRepository {
         const values = [record.id, record.collectionName, record.data]
         try {
             const res = await this._pool.query(sql, values)
-            console.log(res.rows[0]);
         } catch (err) {
             console.log(err.stack)
         }
@@ -27,15 +26,79 @@ export class DocumentRepository implements IDocumentRepository {
     }
 
     async delete(recordId: string): Promise<void> {
-        throw new Error("Method not implemented.");
+        const sql = 'DELETE FROM public.documents WHERE id = $1;'
+        try {
+            const res = await this._pool.query(sql, [recordId]);
+        } catch (err) {
+            console.log(err.stack)
+        }
     }
 
     async get(recordId: string): Promise<Document> {
-        throw new Error("Method not implemented.");
+        const sql = `
+        SELECT 
+        id, 
+        collection_name, 
+        document_data, 
+        created_at, 
+        created_by, 
+        updated_at, 
+        updated_by
+        FROM public.documents
+        WHERE id = $1;        
+        `
+        let document = new Document();
+        try {
+            const res = await this._pool.query(sql, [recordId])
+            if (res.rowCount > 0) {
+                let record = res.rows[0];
+                this.populateEntityFromRecord(document, record);
+                return document;
+            } else {
+                return null;
+            }
+        } catch (err) {
+            console.log(err.stack)
+        }
     }
 
-    async getAll(): Promise<Document[]> {
-        throw new Error("Method not implemented.");
+    private populateEntityFromRecord(document: Document, record: any) {
+        document.collectionName = record.collection_name;
+        document.data = record.document_data;
+        document.id = record.id;
+    }
+
+    async getAll(collection: string): Promise<Document[]> {
+        const sql = `
+        SELECT 
+        id, 
+        collection_name, 
+        document_data, 
+        created_at, 
+        created_by, 
+        updated_at, 
+        updated_by
+        FROM public.documents
+        WHERE collection_name = $1;        
+        `
+
+        let results = Array<Document>();
+        try {
+            const res = await this._pool.query(sql, [collection])
+            if (res.rowCount > 0) {
+                for (let record of res.rows) {
+                    let document = new Document();
+                    this.populateEntityFromRecord(document, record);
+                    results.push(document);
+                }
+
+                return results;
+            } else {
+                return results;
+            }
+        } catch (err) {
+            console.log(err.stack)
+        }
     }
 
     async recordExists(recordId: string): Promise<boolean> {
