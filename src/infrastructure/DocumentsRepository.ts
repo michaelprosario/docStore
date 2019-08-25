@@ -3,7 +3,7 @@ import { Document } from "../core/entities/Document";
 import { IDocumentRepository } from "../core/interfaces/IDocumentRepository";
 
 function logError(info: string) {
-    // todo: fix me
+    console.log(info);
 }
 
 export class DocumentRepository implements IDocumentRepository {

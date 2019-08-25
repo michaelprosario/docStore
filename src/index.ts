@@ -10,7 +10,7 @@ const app = express();
 const port = 8080; // default port to listen
 
 // body parser
-app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(bodyParser.json());
 
 const jsonParser = bodyParser.json();
