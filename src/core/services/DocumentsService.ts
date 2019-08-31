@@ -32,6 +32,7 @@ export class DocumentsService {
         this.validate(record);
 
         record.id = uuid();
+        record.createdAt = new Date();
         await this.repository.add(record);
 
         const response = Responses.getResponse("ok", 200);
@@ -71,11 +72,18 @@ export class DocumentsService {
     }
 
     public async update(record: Document): Promise<IGenericResponse> {
-        const originalRecord = await this.repository.get(record.collectionName, record.id);
-        originalRecord.data = record.data;
-        this.repository.update(originalRecord);
+        const recordExists = await this.repository.recordExists(record.collectionName, record.id);
+        if (!recordExists) {
+            return Responses.getResponse("recordId is not found", 404);
+        }
+
+        const recordToWrite = await this.repository.get(record.collectionName, record.id);
+        recordToWrite.data = record.data;
+        recordToWrite.updatedAt = new Date();
+        this.repository.update(recordToWrite);
 
         const response = Responses.getResponse("ok", 200);
+
         return response;
     }
 

@@ -24,7 +24,15 @@ export class DocumentRepository implements IDocumentRepository {
     }
 
     public async update(record: Document): Promise<void> {
-        throw new Error("Method not implemented.");
+        const client = await this.getClient();
+        try {
+            const collection = this.getCollectionByName(record.collectionName, client);
+            await collection.update({ id: record.id }, record);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            client.close();
+        }
     }
 
     public async delete(collectionName: string, recordId: string): Promise<void> {
@@ -49,7 +57,6 @@ export class DocumentRepository implements IDocumentRepository {
         try {
             const collection = this.getCollectionByName(collectionName, client);
             const dbRecord = await collection.findOne({ id: recordId });
-            console.log(dbRecord);
             record = this.getDocumentFromRecord(dbRecord);
         } catch (err) {
             console.log(err);
@@ -105,6 +112,8 @@ export class DocumentRepository implements IDocumentRepository {
         doc.id = dbRecord.id;
         doc.data = dbRecord.data;
         doc.collectionName = dbRecord.collectionName;
+        doc.createdAt = dbRecord.createdAt;
+        doc.updatedAt = dbRecord.updatedAt;
         return doc;
     }
 

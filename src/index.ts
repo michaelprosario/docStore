@@ -39,7 +39,18 @@ app.post("/add", jsonParser, async (req, res) => {
     const document = new Document();
     document.collectionName = req.body.collectionName;
     document.data = req.body.data;
+
     const response = await documentService.add(document);
+    res.send(response);
+});
+
+app.post("/update", jsonParser, async (req, res) => {
+    const document = new Document();
+    document.id = req.body.id;
+    document.collectionName = req.body.collectionName;
+    document.data = req.body.data;
+
+    const response = await documentService.update(document);
     res.send(response);
 });
 
