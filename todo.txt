@@ -1,0 +1,8 @@
+x- need to set time stamp fields
+    x- create 
+x- implement update operation
+
+- need to set createdby / updatedby fields
+- implement fluent ts validator
+- implement http status codes
+- do integration tests
