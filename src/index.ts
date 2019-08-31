@@ -15,20 +15,20 @@ app.use(bodyParser.json());
 const jsonParser = bodyParser.json();
 const documentService = new DocumentsService(new DocumentRepository());
 
-app.post("/list/:collection", async (req, res) => {
+app.post("/:collection/list/", async (req, res) => {
     const collection = req.params.collection;
     const response = await documentService.getAll(collection);
     res.send(response);
 });
 
-app.post("/get/:collection/:record_id", async (req, res) => {
+app.post("/:collection/get/:record_id", async (req, res) => {
     const record_id = req.params.record_id;
     const collection = req.params.collection;
     const response = await documentService.get(collection, record_id);
     res.send(response);
 });
 
-app.post("/delete/:collection/:record_id", async (req, res) => {
+app.post("/:collection/delete/:record_id", async (req, res) => {
     const record_id = req.params.record_id;
     const collection = req.params.collection;
     const response = await documentService.delete(collection, record_id);

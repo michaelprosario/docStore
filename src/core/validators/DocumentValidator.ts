@@ -5,7 +5,7 @@ export class DocumentValidator extends AbstractValidator<Document> {
     constructor() {
         super();
         this.validateIfString((doc) => doc.collectionName)
-            .isNotEmpty().hasMinLength(5);
+            .isNotEmpty();
 
         this.validateIfAny((doc) => doc.data)
             .isNotEmpty();
