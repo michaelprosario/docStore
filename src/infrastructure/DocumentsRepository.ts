@@ -9,16 +9,10 @@ export class DocumentRepository implements IDocumentRepository {
 
     public async add(record: Document): Promise<string> {
 
-        const client = await MongoClient.connect(dbConnectionConfig.url, { useNewUrlParser: true })
-            .catch((err) => { console.log(err); });
-
-        if (!client) {
-            return;
-        }
+        const client = await this.getClient();
 
         try {
-            const db = client.db(dbConnectionConfig.dbName);
-            const collection = db.collection(record.collectionName);
+            const collection = this.getCollectionByName(record.collectionName, client);
             await collection.insertOne(record);
         } catch (err) {
             console.log(err);
@@ -33,29 +27,30 @@ export class DocumentRepository implements IDocumentRepository {
         throw new Error("Method not implemented.");
     }
 
-    public async delete(collection: string, recordId: string): Promise<void> {
-        throw new Error("Method not implemented.");
+    public async delete(collectionName: string, recordId: string): Promise<void> {
+        const client = await this.getClient();
+
+        try {
+            const collection = this.getCollectionByName(collectionName, client);
+            const dbRecord = await collection.findOneAndDelete({ id: recordId });
+        } catch (err) {
+            console.log(err);
+        } finally {
+            client.close();
+        }
 
     }
 
     public async get(collectionName: string, recordId: string): Promise<Document> {
-        const client = await MongoClient.connect(dbConnectionConfig.url, { useNewUrlParser: true })
-            .catch((err) => { console.log(err); });
+        const client = await this.getClient();
 
-        if (!client) {
-            return;
-        }
-
-        const record = new Document();
+        let record: Document;
 
         try {
-            const db = client.db(dbConnectionConfig.dbName);
-            const collection = db.collection(collectionName);
+            const collection = this.getCollectionByName(collectionName, client);
             const dbRecord = await collection.findOne({ id: recordId });
-            record.id = dbRecord.id;
-            record.data = dbRecord.data;
-            record.collectionName = dbRecord.collectionName;
-
+            console.log(dbRecord);
+            record = this.getDocumentFromRecord(dbRecord);
         } catch (err) {
             console.log(err);
         } finally {
@@ -67,23 +62,14 @@ export class DocumentRepository implements IDocumentRepository {
 
     public async getAll(collectionName: string): Promise<Document[]> {
 
+        const client = await this.getClient();
         const results = Array<Document>();
-        const client = await MongoClient.connect(dbConnectionConfig.url, { useNewUrlParser: true })
-            .catch((err) => { console.log(err); });
-
-        if (!client) {
-            return;
-        }
 
         try {
-            const db = client.db(dbConnectionConfig.dbName);
-            const collection = db.collection(collectionName);
+            const collection = this.getCollectionByName(collectionName, client);
             const records = await collection.find({}).toArray();
             records.forEach((element) => {
-                const doc = new Document();
-                doc.id = element.id;
-                doc.data = element.data;
-                doc.collectionName = element.collectionName;
+                const doc = this.getDocumentFromRecord(element);
                 results.push(doc);
             });
         } catch (err) {
@@ -95,13 +81,40 @@ export class DocumentRepository implements IDocumentRepository {
         return results;
     }
 
-    public async recordExists(recordId: string): Promise<boolean> {
-        return false;
+    public async recordExists(collectionName: string, recordId: string): Promise<boolean> {
+        const client = await this.getClient();
+
+        let result = false;
+
+        try {
+            const db = client.db(dbConnectionConfig.dbName);
+            const collection = db.collection(collectionName);
+            const dbRecord = await collection.findOne({ id: recordId });
+            result = dbRecord !== null;
+        } catch (err) {
+            console.log(err);
+        } finally {
+            client.close();
+        }
+
+        return result;
     }
 
-    private populateEntityFromRecord(document: Document, record: any) {
-        document.collectionName = record.collection_name;
-        document.data = record.document_data;
-        document.id = record.id;
+    private getDocumentFromRecord(dbRecord: any): Document {
+        const doc = new Document();
+        doc.id = dbRecord.id;
+        doc.data = dbRecord.data;
+        doc.collectionName = dbRecord.collectionName;
+        return doc;
+    }
+
+    private async getClient(): Promise<MongoClient> {
+        return await MongoClient.connect(dbConnectionConfig.url, { useNewUrlParser: true });
+    }
+
+    private getCollectionByName(name: string, client: MongoClient) {
+        const db = client.db(dbConnectionConfig.dbName);
+        const collection = db.collection(name);
+        return collection;
     }
 }
