@@ -1,25 +1,29 @@
-import { Pool } from "pg";
+
 import { Document } from "../core/entities/Document";
 import { IDocumentRepository } from "../core/interfaces/IDocumentRepository";
-
-function logError(info: string) {
-    console.log(info);
-}
+// tslint:disable-next-line:ordered-imports
+import { MongoClient } from "mongodb";
+import { dbConnectionConfig } from "./DbConnectionConfig";
 
 export class DocumentRepository implements IDocumentRepository {
 
-    public pool: Pool;
-    constructor(pool: Pool) {
-        this.pool = pool;
-    }
-
     public async add(record: Document): Promise<string> {
-        const sql = "INSERT INTO public.documents(id, collection_name, document_data)VALUES ($1, $2, $3);";
-        const values = [record.id, record.collectionName, record.data];
+
+        const client = await MongoClient.connect(dbConnectionConfig.url, { useNewUrlParser: true })
+            .catch((err) => { console.log(err); });
+
+        if (!client) {
+            return;
+        }
+
         try {
-            const res = await this.pool.query(sql, values);
+            const db = client.db(dbConnectionConfig.dbName);
+            const collection = db.collection(record.collectionName);
+            await collection.insertOne(record);
         } catch (err) {
-            logError(err.stack);
+            console.log(err);
+        } finally {
+            client.close();
         }
 
         return record.id;
@@ -29,89 +33,70 @@ export class DocumentRepository implements IDocumentRepository {
         throw new Error("Method not implemented.");
     }
 
-    public async delete(recordId: string): Promise<void> {
-        const sql = "DELETE FROM public.documents WHERE id = $1;";
-        try {
-            const res = await this.pool.query(sql, [recordId]);
-        } catch (err) {
-            logError(err.stack);
-        }
+    public async delete(collection: string, recordId: string): Promise<void> {
+        throw new Error("Method not implemented.");
+
     }
 
-    public async get(recordId: string): Promise<Document> {
-        const sql = `
-        SELECT
-        id,
-        collection_name,
-        document_data,
-        created_at,
-        created_by,
-        updated_at,
-        updated_by
-        FROM public.documents
-        WHERE id = $1;
-        `;
-        const document = new Document();
-        try {
-            const res = await this.pool.query(sql, [recordId]);
-            if (res.rowCount > 0) {
-                const record = res.rows[0];
-                this.populateEntityFromRecord(document, record);
-                return document;
-            } else {
-                return null;
-            }
-        } catch (err) {
-            logError(err.stack);
+    public async get(collectionName: string, recordId: string): Promise<Document> {
+        const client = await MongoClient.connect(dbConnectionConfig.url, { useNewUrlParser: true })
+            .catch((err) => { console.log(err); });
+
+        if (!client) {
+            return;
         }
+
+        const record = new Document();
+
+        try {
+            const db = client.db(dbConnectionConfig.dbName);
+            const collection = db.collection(collectionName);
+            const dbRecord = await collection.findOne({ id: recordId });
+            record.id = dbRecord.id;
+            record.data = dbRecord.data;
+            record.collectionName = dbRecord.collectionName;
+
+        } catch (err) {
+            console.log(err);
+        } finally {
+            client.close();
+        }
+
+        return record;
     }
 
-    public async getAll(collection: string): Promise<Document[]> {
-        const sql = `
-        SELECT
-        id,
-        collection_name,
-        document_data,
-        created_at,
-        created_by,
-        updated_at,
-        updated_by
-        FROM public.documents
-        WHERE collection_name = $1;
-        `;
+    public async getAll(collectionName: string): Promise<Document[]> {
 
         const results = Array<Document>();
-        try {
-            const res = await this.pool.query(sql, [collection]);
-            if (res.rowCount > 0) {
-                for (const record of res.rows) {
-                    const document = new Document();
-                    this.populateEntityFromRecord(document, record);
-                    results.push(document);
-                }
+        const client = await MongoClient.connect(dbConnectionConfig.url, { useNewUrlParser: true })
+            .catch((err) => { console.log(err); });
 
-                return results;
-            } else {
-                return results;
-            }
-        } catch (err) {
-            logError(err.stack);
+        if (!client) {
+            return;
         }
+
+        try {
+            const db = client.db(dbConnectionConfig.dbName);
+            const collection = db.collection(collectionName);
+            const records = await collection.find({}).toArray();
+            records.forEach((element) => {
+                const doc = new Document();
+                doc.id = element.id;
+                doc.data = element.data;
+                doc.collectionName = element.collectionName;
+                results.push(doc);
+            });
+        } catch (err) {
+            console.log(err);
+        } finally {
+            client.close();
+        }
+
+        return results;
     }
 
     public async recordExists(recordId: string): Promise<boolean> {
-        const sql = "SELECT COUNT(*) FROM public.documents WHERE id = $1";
-        const values = [recordId];
-        let count: number;
-
-        try {
-            const res = await this.pool.query(sql, values);
-            count = res.rows[0].count;
-        } catch (err) {
-            logError(err.stack);
-        }
-
-        return count > 0;
+        return false;
     }
 
     private populateEntityFromRecord(document: Document, record: any) {

@@ -39,39 +39,39 @@ export class DocumentsService {
         return response;
     }
 
-    public async delete(recordId: string): Promise<IGenericResponse> {
+    public async delete(collection: string, recordId: string): Promise<IGenericResponse> {
         if (!recordId || recordId === "") {
             return Responses.getResponse("recordId is not defined", 400);
         }
 
-        const recordExists = await this.repository.recordExists(recordId);
+        const recordExists = await this.repository.recordExists(collection, recordId);
         if (!recordExists) {
             return Responses.getResponse("recordId is not found", 404);
         }
 
-        await this.repository.delete(recordId);
+        await this.repository.delete(collection, recordId);
 
         return Responses.getResponse("ok", 200);
     }
 
-    public async get(recordId: string): Promise<IGenericResponse> {
+    public async get(collection: string, recordId: string): Promise<IGenericResponse> {
         if (!recordId || recordId === "") {
             return Responses.getResponse("recordId is not defined", 400);
         }
 
-        const recordExists = await this.repository.recordExists(recordId);
+        const recordExists = await this.repository.recordExists(collection, recordId);
         if (!recordExists) {
             return Responses.getResponse("recordId is not found", 404);
         }
 
         const response = Responses.getResponse("ok", 200);
-        response.data = await this.repository.get(recordId);
+        response.data = await this.repository.get(collection, recordId);
 
         return response;
     }
 
     public async update(record: Document): Promise<IGenericResponse> {
-        const originalRecord = await this.repository.get(record.id);
+        const originalRecord = await this.repository.get(record.collectionName, record.id);
         originalRecord.data = record.data;
         this.repository.update(originalRecord);
 

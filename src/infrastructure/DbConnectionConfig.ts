@@ -1,7 +1,6 @@
 export const dbConnectionConfig = {
-    database: "docs",
-    host: "localhost",
-    password: "dude",
-    port: 1234,
-    user: "docs",
+    dbName: "ims",
+    password: "admin",
+    url: "mongodb://localhost:27017",
+    user: "admin123",
 };

@@ -1,6 +1,5 @@
 import bodyParser = require("body-parser");
 import express from "express";
-import { Pool } from "pg";
 import { Document } from "./core/entities/Document";
 import { DocumentsService } from "./core/services/DocumentsService";
 import { dbConnectionConfig } from "./infrastructure/DbConnectionConfig";
@@ -14,9 +13,7 @@ const port = 8080; // default port to listen
 app.use(bodyParser.json());
 
 const jsonParser = bodyParser.json();
-
-const pool = new Pool(dbConnectionConfig);
-const documentService = new DocumentsService(new DocumentRepository(pool));
+const documentService = new DocumentsService(new DocumentRepository());
 
 app.post("/list/:collection", async (req, res) => {
     const collection = req.params.collection;
@@ -24,15 +21,17 @@ app.post("/list/:collection", async (req, res) => {
     res.send(response);
 });
 
-app.post("/get/:record_id", async (req, res) => {
+app.post("/get/:collection/:record_id", async (req, res) => {
     const record_id = req.params.record_id;
-    const response = await documentService.get(record_id);
+    const collection = req.params.collection;
+    const response = await documentService.get(collection, record_id);
     res.send(response);
 });
 
-app.post("/delete/:record_id", async (req, res) => {
+app.post("/delete/:collection/:record_id", async (req, res) => {
     const record_id = req.params.record_id;
-    const response = await documentService.delete(record_id);
+    const collection = req.params.collection;
+    const response = await documentService.delete(collection, record_id);
     res.send(response);
 });
 

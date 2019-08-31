@@ -57,7 +57,7 @@ describe("DocumentsService", () => {
       const response = await service.add(doc);
 
       // assert
-      assert.isTrue(response.recordId != null);
+      assert.isTrue(response.recordId != null, "record id should be defined");
       documentRepository.received().add(Arg.any());
     });
 
