@@ -1,3 +1,4 @@
+import * as HttpStatus from "http-status-codes";
 import { IGenericResponse } from "../interfaces/IGenericResponse";
 
 export class Responses {
@@ -6,5 +7,15 @@ export class Responses {
         response.message = message;
         response.code = code;
         return response;
+    }
+
+    public static getValidationResponse(errorData: string[], id: string): IGenericResponse {
+        return {
+            code: HttpStatus.BAD_REQUEST,
+            data: null,
+            errors: errorData,
+            message: "Bad data",
+            recordId: id,
+        };
     }
 }

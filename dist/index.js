@@ -46,6 +46,14 @@ app.post("/add", jsonParser, (req, res) => __awaiter(this, void 0, void 0, funct
     const response = yield documentService.add(document);
     res.send(response);
 }));
+app.post("/update", jsonParser, (req, res) => __awaiter(this, void 0, void 0, function* () {
+    const document = new Document_1.Document();
+    document.id = req.body.id;
+    document.collectionName = req.body.collectionName;
+    document.data = req.body.data;
+    const response = yield documentService.update(document);
+    res.send(response);
+}));
 app.post("/test", (req, res) => __awaiter(this, void 0, void 0, function* () {
     res.setHeader("Content-Type", "text/plain");
     res.write("you posted:\n");

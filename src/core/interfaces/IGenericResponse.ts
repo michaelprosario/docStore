@@ -2,6 +2,6 @@ export interface IGenericResponse {
     recordId: string;
     code: number;
     message: string;
-    errors: [];
+    errors: string[];
     data: any;
 }
