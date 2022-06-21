@@ -15,6 +15,10 @@ app.use(bodyParser.json());
 const jsonParser = bodyParser.json();
 const documentService = new DocumentsService(new DocumentRepository());
 
+app.get('/', async (req, res) => {
+    res.send('ok');
+})
+
 app.post("/:collection/list/", async (req, res) => {
     const collection = req.params.collection;
     const response = await documentService.getAll(collection);
